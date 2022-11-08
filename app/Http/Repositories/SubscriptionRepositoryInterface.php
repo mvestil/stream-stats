@@ -23,4 +23,11 @@ interface SubscriptionRepositoryInterface
      * @return string - the subscription id
      */
     public function subscribe(User $user, PaymentMethod $paymentMethod, Plan $plan): string;
+
+    /**
+     * @param User   $user
+     * @param string $id
+     * @return mixed
+     */
+    public function cancel(User $user, string $id);
 }

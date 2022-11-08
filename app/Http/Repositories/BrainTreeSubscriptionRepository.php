@@ -46,6 +46,25 @@ class BrainTreeSubscriptionRepository implements SubscriptionRepositoryInterface
     }
 
     /**
+     * @param User   $user
+     * @param string $id
+     * @return mixed|void
+     */
+    public function cancel(User $user, string $id)
+    {
+        /**
+         * @var Gateway $gateway
+         */
+        $gateway = app(Gateway::class);
+
+        $result = $gateway->subscription()->cancel($id);
+
+        if (!$result->success) {
+            throw new \RuntimeException('Failed to cancel subscription');
+        }
+    }
+
+    /**
      * Create the customer in braintree if not yet created.
      * We can put this into its own service & repo, but for demo purposes, let's just do it here
      *

@@ -53,6 +53,23 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Cancel the current subscription
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Throwable
+     */
+    public function cancel(Request $request)
+    {
+        $this->service->cancel($request->user());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Subscription cancelled successfully',
+        ]);
+    }
+
+    /**
      * @return Plan
      * @throws \Throwable
      */

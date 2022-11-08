@@ -15,6 +15,24 @@
                 <span class="border col-md-12">Subscribed Metrics 1 (Placeholder)</span>
                 <span class="border col-md-12">Subscribed Metrics 2 (Placeholder)</span>
             </div>
+
+            <script>
+                function cancelSub() {
+                    const url = '{{ route('sub.cancel') }}';
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer {{ auth()->user()->api_token }}'
+                        },
+                    }).then((response) => response.json())
+                        .then(data => {
+                            alert(data.message)
+                            location.reload()
+                        })
+                }
+            </script>
         @else
             @include('sub')
         @endif

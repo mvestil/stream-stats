@@ -18,3 +18,4 @@ use App\Http\Enums\Plan;
 
 
 Route::middleware('auth:api')->post('/subscription', [SubscriptionController::class, 'subscribe'])->name('subscribe');
+Route::middleware('auth:api')->post('/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('sub.cancel');

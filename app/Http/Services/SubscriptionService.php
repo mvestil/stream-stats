@@ -53,4 +53,17 @@ class SubscriptionService
 
         return $sub;
     }
+
+    /**
+     * Cancel the subscription
+     *
+     * @param User $user
+     * @throws \Throwable
+     */
+    public function cancel(User $user)
+    {
+        throw_if(!$user->isSubscribed(), new RuntimeException('User is not subscribed. Nothing to cancel'));
+        $this->repo->cancel($user, $user->subscription->subscription_id);
+        $user->subscription->delete();
+    }
 }
