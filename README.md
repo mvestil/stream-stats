@@ -10,4 +10,11 @@ Run
 sail up
 ```
 
-Then go to `http://localhost/register`
+- Then go to `http://localhost/register` to sign up
+
+# Tests
+
+Run 
+```
+sail test
+```
