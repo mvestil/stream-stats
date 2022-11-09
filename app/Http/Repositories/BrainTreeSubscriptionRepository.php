@@ -4,6 +4,7 @@ namespace App\Http\Repositories;
 
 use App\Http\Enums\Plan;
 use App\Http\PaymentMethod;
+use App\Http\SubscribeParams;
 use App\Models\Subscription;
 use App\Models\User;
 use Braintree\Gateway;
@@ -17,7 +18,7 @@ class BrainTreeSubscriptionRepository implements SubscriptionRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function subscribe(User $user, PaymentMethod $paymentMethod, Plan $plan): string
+    public function subscribe(User $user, SubscribeParams $subscribeParams): Subscription
     {
         /**
          * @var Gateway $gateway
@@ -25,8 +26,8 @@ class BrainTreeSubscriptionRepository implements SubscriptionRepositoryInterface
         $gateway = app(Gateway::class);
 
         $payload = [
-            'planId'             => $plan->value,
-            'paymentMethodToken' => $paymentMethod->getToken() ?: $this->createCustomerPaymentMethod($user, $paymentMethod),
+            'planId'             => $subscribeParams->getPlan()->value,
+            'paymentMethodToken' => $subscribeParams->getPaymentMethodToken() ?: $this->createCustomerPaymentMethod($user, $subscribeParams),
         ];
 
         $result = $gateway->subscription()->create($payload);
@@ -39,43 +40,49 @@ class BrainTreeSubscriptionRepository implements SubscriptionRepositoryInterface
 
         if ($result->success) {
             logger("success!: ".$result->subscription->id ?? '');
-            return $result->subscription->id;
+
+            return Subscription::create([
+                'user_id'         => $user->id,
+                'subscription_id' => $result->subscription->id,
+                'plan_id'         => $subscribeParams->getPlan()->value,
+            ]);
         }
 
         throw new \RuntimeException('Failed to subscribe');
     }
 
     /**
-     * @param User   $user
-     * @param string $id
+     * @param User $user
      * @return mixed|void
      */
-    public function cancel(User $user, string $id)
+    public function cancel(User $user)
     {
         /**
          * @var Gateway $gateway
          */
         $gateway = app(Gateway::class);
 
-        $result = $gateway->subscription()->cancel($id);
+        $result = $gateway->subscription()->cancel($user->subscription->subscription_id);
 
         if (!$result->success) {
             throw new \RuntimeException('Failed to cancel subscription');
         }
+
+        $user->subscription->delete();
     }
 
     /**
      * Create the customer in braintree if not yet created.
      * We can put this into its own service & repo, but for demo purposes, let's just do it here
      *
-     * @param User          $user
-     * @param PaymentMethod $paymentMethod
+     * @param User            $user
+     * @param SubscribeParams $subscribeParams
      * @return string - the payment method token
      * @throws \Throwable
      */
-    private function createCustomerPaymentMethod(User $user, PaymentMethod $paymentMethod): string
+    private function createCustomerPaymentMethod(User $user, SubscribeParams $subscribeParams): string
     {
-        throw_if(!$paymentMethod->getNonce(), new \RuntimeException('Payment method nonce is required'));
+        throw_if(!$subscribeParams->getPaymentMethodNonce(), new \RuntimeException('Payment method nonce is required'));
 
         /**
          * @var Gateway $gateway
@@ -84,7 +91,7 @@ class BrainTreeSubscriptionRepository implements SubscriptionRepositoryInterface
         $user = $this->createCustomerIfNotCreated($user);
         $result = $gateway->paymentMethod()->create([
             'customerId'         => $user->gateway_customer_id,
-            'paymentMethodNonce' => $paymentMethod->getNonce(),
+            'paymentMethodNonce' => $subscribeParams->getPaymentMethodNonce(),
         ]);
 
         if (!$result->success) {
@@ -126,5 +133,4 @@ class BrainTreeSubscriptionRepository implements SubscriptionRepositoryInterface
 
         return $user;
     }
-
 }

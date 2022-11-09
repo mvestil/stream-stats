@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\PaymentMethod;
 use App\Http\Services\SubscriptionService;
+use App\Http\SubscribeParams;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Enums\Plan;
@@ -39,12 +40,7 @@ class SubscriptionController extends Controller
         ]);
 
         $plan = $this->validatePlan($request);
-
-        $this->service->subscribe(
-            $request->user(),
-            (new PaymentMethod)->setNonce($request->payment_method_nonce),
-            $plan
-        );
+        $this->service->subscribe($request->user(), new SubscribeParams($plan, $request->payment_method_nonce));
 
         return response()->json([
             'success' => true,

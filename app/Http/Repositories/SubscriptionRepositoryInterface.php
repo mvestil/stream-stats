@@ -3,6 +3,7 @@
 namespace App\Http\Repositories;
 
 use App\Http\PaymentMethod;
+use App\Http\SubscribeParams;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Http\Enums\Plan;
@@ -17,17 +18,15 @@ interface SubscriptionRepositoryInterface
     /**
      * Create a subscription to the payment gateway
      *
-     * @param User          $user
-     * @param PaymentMethod $paymentMethod
-     * @param Plan          $plan
-     * @return string - the subscription id
+     * @param User                      $user
+     * @param SubscribeParams $subscribeParams
+     * @return Subscription - the subscription id
      */
-    public function subscribe(User $user, PaymentMethod $paymentMethod, Plan $plan): string;
+    public function subscribe(User $user, SubscribeParams $subscribeParams): Subscription;
 
     /**
-     * @param User   $user
-     * @param string $id
+     * @param User $user
      * @return mixed
      */
-    public function cancel(User $user, string $id);
+    public function cancel(User $user);
 }
