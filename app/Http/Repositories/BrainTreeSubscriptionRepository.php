@@ -32,11 +32,11 @@ class BrainTreeSubscriptionRepository implements SubscriptionRepositoryInterface
 
         $result = $gateway->subscription()->create($payload);
 
+        logger('result subscribe', [$result->subscription]);
+
         if (!$result->success) {
             throw new \RuntimeException('Unable to successfully subscribe in Braintree');
         }
-
-        logger('result subscribe', [$result->subscription]);
 
         if ($result->success) {
             logger("success!: ".$result->subscription->id ?? '');

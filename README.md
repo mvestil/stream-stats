@@ -16,5 +16,5 @@ sail up
 
 Run 
 ```
-sail test
+sail artisan test
 ```
